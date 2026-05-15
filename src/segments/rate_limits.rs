@@ -21,7 +21,7 @@ pub fn render(input: &Input) -> Vec<String> {
 
     match data {
         Some(d) => api_segments(&d),
-        None => vec!["5h -".to_string(), "7d -".to_string()],
+        None => vec!["HourlyReset: -".to_string(), "WeeklyReset: -".to_string()],
     }
 }
 
@@ -53,7 +53,7 @@ fn builtin_segments(rl: &RateLimits) -> Vec<String> {
 
     if let Some(five) = &rl.five_hour {
         if let Some(pct) = five.used_percentage {
-            let mut seg = format!("5h {}%", pct.round() as i64);
+            let mut seg = format!("HourlyReset: {}%", pct.round() as i64);
             if let Some(epoch) = epoch_from_value(five.resets_at.as_ref()) {
                 seg.push_str(&format!(" @{}", format_hhmm(epoch)));
             }
@@ -63,7 +63,7 @@ fn builtin_segments(rl: &RateLimits) -> Vec<String> {
 
     if let Some(seven) = &rl.seven_day {
         if let Some(pct) = seven.used_percentage {
-            let mut seg = format!("7d {}%", pct.round() as i64);
+            let mut seg = format!("WeeklyReset: {}%", pct.round() as i64);
             if let Some(epoch) = epoch_from_value(seven.resets_at.as_ref()) {
                 seg.push_str(&format!(" @{}", format_datetime(epoch)));
             }
@@ -78,10 +78,10 @@ fn api_segments(data: &Value) -> Vec<String> {
     let mut segs = Vec::new();
 
     if let Some(five) = data.get("five_hour") {
-        segs.push(api_segment(five, "5h", true));
+        segs.push(api_segment(five, "HourlyReset", true));
     }
     if let Some(seven) = data.get("seven_day") {
-        segs.push(api_segment(seven, "7d", false));
+        segs.push(api_segment(seven, "WeeklyReset", false));
     }
     segs
 }
@@ -91,7 +91,7 @@ fn api_segment(window: &Value, label: &str, hhmm: bool) -> String {
         .get("utilization")
         .and_then(|v| v.as_f64())
         .unwrap_or(0.0);
-    let mut seg = format!("{label} {}%", pct.round() as i64);
+    let mut seg = format!("{label}: {}%", pct.round() as i64);
     if let Some(iso) = window.get("resets_at").and_then(|v| v.as_str()) {
         if let Some(epoch) = iso_to_epoch(iso) {
             let stamp = if hhmm {

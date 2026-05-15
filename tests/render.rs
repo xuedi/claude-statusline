@@ -11,7 +11,7 @@ fn empty_input_renders_claude_literal() {
 fn malformed_json_does_not_panic() {
     let out = render("{not valid json");
     assert!(out.starts_with("Claude"), "got: {out}");
-    assert!(out.contains("effort:"));
+    assert!(out.contains("Effort:"));
 }
 
 #[test]
@@ -33,12 +33,13 @@ fn full_builtin_payload_emits_expected_segments() {
     let parts: Vec<&str> = out.split(" | ").collect();
 
     assert_eq!(parts[0], "Claude Sonnet 4.6 1M");
-    // git segment is absent (cwd is not a repo) so tokens comes next
-    assert!(parts[1].starts_with("250k/1m ["));
+    // effort comes right after model
     assert_eq!(
-        parts[2],
-        format!("effort: {}", parts[2].trim_start_matches("effort: "))
+        parts[1],
+        format!("Effort: {}", parts[1].trim_start_matches("Effort: "))
     );
-    assert_eq!(parts[3], "5h 42%");
-    assert_eq!(parts[4], "7d 18%");
+    // git segment is absent (cwd is not a repo) so tokens comes next
+    assert!(parts[2].starts_with("250k/1m ["));
+    assert_eq!(parts[3], "HourlyReset: 42%");
+    assert_eq!(parts[4], "WeeklyReset: 18%");
 }
