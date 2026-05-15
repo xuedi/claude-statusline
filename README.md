@@ -2,6 +2,7 @@
 
 A fast, minimal statusline for [Claude Code](https://claude.com/claude-code).
 
+[![CI](https://github.com/xuedi/claude-statusline/actions/workflows/ci.yml/badge.svg)](https://github.com/xuedi/claude-statusline/actions/workflows/ci.yml)
 [![License: EUPL-1.2](https://img.shields.io/badge/License-EUPL--1.2-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/Rust-1.85+-orange?logo=rust&logoColor=white)](https://www.rust-lang.org)
 [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/)
