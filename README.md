@@ -3,11 +3,9 @@
 A fast, minimal statusline for [Claude Code](https://claude.com/claude-code).
 
 [![CI](https://github.com/xuedi/claude-statusline/actions/workflows/ci.yml/badge.svg)](https://github.com/xuedi/claude-statusline/actions/workflows/ci.yml)
-[![License: EUPL-1.2](https://img.shields.io/badge/License-EUPL--1.2-blue.svg)](LICENSE)
-[![Rust](https://img.shields.io/badge/Rust-1.85+-orange?logo=rust&logoColor=white)](https://www.rust-lang.org)
 [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/)
-[![Built for Claude Code](https://img.shields.io/badge/Built_for-Claude_Code-blueviolet?logo=anthropic&logoColor=white)](https://claude.ai/claude-code)
 [![Made with Braille](https://img.shields.io/badge/progress_bars-%E2%A3%BF%E2%A3%BF%E2%A3%BF%E2%A3%B7-brightgreen)](#what-it-shows)
+[![Rust](https://img.shields.io/badge/Rust-1.85+-orange?logo=rust&logoColor=white)](https://www.rust-lang.org)
 
 ```
 Claude Sonnet 4.6 1M | git@main (+12 -3) | 250k/1m [⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀] | effort: high | 5h 3% @03:30 | 7d 11% @May 18, 22:00
