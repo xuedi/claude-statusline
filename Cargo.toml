@@ -1,0 +1,33 @@
+[package]
+name = "claude-statusline"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "EUPL-1.2"
+description = "Statusline renderer for Claude Code: model, git, token usage, effort, rate limits."
+repository = "https://github.com/xuedi/claude-statusline"
+homepage = "https://github.com/xuedi/claude-statusline"
+keywords = ["claude", "claude-code", "statusline", "cli"]
+categories = ["command-line-utilities"]
+readme = "README.md"
+
+[[bin]]
+name = "claude-statusline"
+path = "src/main.rs"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = "0.4"
+ureq = "2"
+
+[dev-dependencies]
+pretty_assertions = "1"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
