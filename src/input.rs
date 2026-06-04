@@ -8,6 +8,12 @@ pub struct Input {
     pub cwd: Option<String>,
     pub context_window: Option<ContextWindow>,
     pub rate_limits: Option<RateLimits>,
+    pub effort: Option<Effort>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Effort {
+    pub level: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
