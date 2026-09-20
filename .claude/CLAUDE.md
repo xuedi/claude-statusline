@@ -7,6 +7,14 @@ prints one line: project name, model, git branch and diff, token usage with a br
 bar, effort level, and 5h/7d rate limits. Around 500 lines of code total, library
 plus a thin binary.
 
+The project docs are the source of truth - read them instead of re-deriving:
+
+| Doc                      | What is in it                                                 |
+|--------------------------|----------------------------------------------------------------|
+| `docs/architecture.md`   | File layout table, data flow, settled design decisions          |
+| `docs/contributing.md`   | Dev loop, branching, code style, adding a segment, tests, release |
+| `docs/install.md`        | Distro packages                                                 |
+
 ## Run it
 
 ```bash
@@ -17,90 +25,35 @@ Run that before reporting work done.
 
 ## Code style
 
+Full list in `docs/contributing.md#code-style`. The ones that bite:
+
 - ASCII `-` only - never em dash (`—`) in code, prose, or mermaid labels
-- Comments are scarce. Allowed: doc comments on public items, `// WHY:` comments for
-  non-obvious workarounds, and AAA markers in tests when they help. No narrative
-  comments that re-state what the code does.
-- Use `use` imports - never fully-qualified inline (`std::io::Read`, not
-  `std::io::stdin().read_to_string(...)` with the path inline)
-- Format on save with `cargo fmt`. Clippy must stay clean with `-D warnings`.
+- Comments are scarce: doc comments on public items, `// WHY:` for non-obvious
+  workarounds, AAA markers in tests. No narrative comments.
+- Use `use` imports - never fully-qualified inline paths
 - `.unwrap()` is for tests. Production code returns `Option` / `Result` and
   collapses to the documented fallback at the top level.
 
-## Layout
+## Settled questions
 
-| File                          | What lives there                                          |
-|-------------------------------|-----------------------------------------------------------|
-| src/main.rs                   | Reads stdin, calls `render`, prints                       |
-| src/lib.rs                    | `render()` orchestrator and module re-exports             |
-| src/input.rs                  | Serde input types for the Claude statusline payload       |
-| src/error.rs                  | Hand-rolled `Error` enum + `Result` alias                 |
-| src/bar.rs                    | Braille progress bar                                      |
-| src/cache.rs                  | On-disk JSON cache under /tmp/claude/                     |
-| src/api.rs                    | `/api/oauth/usage` fetcher                                |
-| src/time.rs                   | Epoch + ISO datetime helpers                              |
-| src/segments/mod.rs           | `all(&Input)` flat dispatcher                             |
-| src/segments/model.rs         | Model name segment                                        |
-| src/segments/project.rs       | Project name segment + generic-subfolder list             |
-| src/segments/git.rs           | Git branch + numstat segment                              |
-| src/segments/tokens.rs        | Token bar segment                                         |
-| src/segments/effort.rs        | Effort level segment                                      |
-| src/segments/rate_limits.rs   | Rate-limit segments (builtin + API path)                  |
-| tests/render.rs               | Integration test feeding fixture payloads to `render()`   |
+Do not re-propose these; the rationale is in `docs/architecture.md#decisions`.
 
-## Adding a segment
-
-1. Write `src/segments/<name>.rs` exposing `pub fn render(input: &Input) -> ...`
-2. Wire it into `segments::all()` in `src/segments/mod.rs`
-3. Add a unit test in the same module
-
-The "do we need a `Segment` trait" question is settled: no. Five hand-listed
-segments do not need the indirection. Do not propose one.
-
-## Test coverage
-
-Covered:
-
-- `bar::render` - bar widths at 0%, 50%, 100%, partial steps, clamping
-- `segments::tokens::format_tokens` - all the rounding and unit boundaries
-- `segments::model::format_model` - context-paren stripping, edge cases
-- `segments::project::project_name` - generic-subfolder walk-up, list invariants
-- `time::iso_to_epoch`, `time::epoch_from_value` - happy path + rejection
-- `cache::short_hash` - determinism, differentiation, hex shape
-- `lib::render` - empty input, malformed JSON, full payload (integration test)
-
-Not covered (intentional):
-
-- `segments::git` - shells out to `git`; would need a fixture repo or a runner trait
-- `api::fetch_usage` - real network call; mocking would require trait injection
-  through the whole rate-limits path
-- `cache::cache_is_fresh`, `cache::load_json_cache` - filesystem I/O
-
-If you find yourself wanting to test these, prefer adding a smoke test over
-introducing a mocking layer.
+- No `Segment` trait. Five hand-listed segments do not need the indirection.
+- Hand-rolled `Error` enum, not `anyhow` / `thiserror`.
+- New dependencies need to clear the bar in `docs/contributing.md#adding-a-dependency`.
+- `segments::git`, `api::fetch_usage` and the `cache` filesystem paths are
+  deliberately untested. Prefer a smoke test over a mocking layer.
 
 ## Git workflow
 
-Never create commits yourself. `git status` and `git diff` are fine for inspection.
-Let the user commit.
+Never create commits yourself unless the user asks for one. `git status` and
+`git diff` are fine for inspection.
 
-`main` is protected on GitHub and only moves through pull requests:
-
-- All work happens on `development` (or a short-lived topic branch cut from it).
-- Never edit or push `main` directly - it rejects direct pushes, force-pushes and
-  deletions, and requires the CI `check` job to pass.
-- `development` merges into `main` by pull request. Squash or rebase only; merge
-  commits are disabled because `main` requires linear history.
-- After a release merge, bring `development` back up to date with
-  `git switch development && git rebase origin/main`.
-- If a task starts while `main` is checked out, switch to `development` first.
+`main` is protected and only moves through pull requests. All work happens on
+`development` or a topic branch cut from it; if a task starts while `main` is
+checked out, switch first. Full flow in `docs/contributing.md#branching`.
 
 ## Planning
 
 If asked for a plan, write it to `.claude/plans/YYYY-MM-DD_<slug>.md` (create the
 directory on demand). Freeform is fine for a project this size - no template.
-
-## See also
-
-- `.claude/conventions.md` - the rationale for why a few non-obvious choices were
-  made (no `Segment` trait, hand-rolled `Error` enum, etc.)
