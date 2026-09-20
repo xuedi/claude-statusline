@@ -33,7 +33,7 @@ packaged for the common distro families.
 ### Debian, Ubuntu, Mint
 
 ```bash
-VERSION=0.1.0
+VERSION=1.0.0
 curl -LO https://github.com/xuedi/claude-statusline/releases/download/v$VERSION/claude-statusline_$VERSION-1_amd64.deb
 sudo dpkg -i claude-statusline_$VERSION-1_amd64.deb
 ```
@@ -41,7 +41,7 @@ sudo dpkg -i claude-statusline_$VERSION-1_amd64.deb
 ### Fedora, RHEL, openSUSE
 
 ```bash
-VERSION=0.1.0
+VERSION=1.0.0
 curl -LO https://github.com/xuedi/claude-statusline/releases/download/v$VERSION/claude-statusline-$VERSION-1.x86_64.rpm
 sudo rpm -i claude-statusline-$VERSION-1.x86_64.rpm
 ```
@@ -51,7 +51,7 @@ sudo rpm -i claude-statusline-$VERSION-1.x86_64.rpm
 Install the prebuilt package straight from the release:
 
 ```bash
-VERSION=0.1.0
+VERSION=1.0.0
 curl -LO https://github.com/xuedi/claude-statusline/releases/download/v$VERSION/claude-statusline-bin-$VERSION-1-x86_64.pkg.tar.zst
 sudo pacman -U claude-statusline-bin-$VERSION-1-x86_64.pkg.tar.zst
 ```
@@ -66,7 +66,7 @@ makepkg -si
 ### Any other distro
 
 ```bash
-VERSION=0.1.0
+VERSION=1.0.0
 curl -L https://github.com/xuedi/claude-statusline/releases/download/v$VERSION/claude-statusline-$VERSION-x86_64-linux.tar.gz | tar xz
 install -Dm755 claude-statusline ~/.claude/claude-statusline
 ```
