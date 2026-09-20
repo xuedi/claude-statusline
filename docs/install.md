@@ -3,9 +3,11 @@
 The standard install is [from source](../README.md#install). This page covers the
 prebuilt packages attached to every [tagged release](https://github.com/xuedi/claude-statusline/releases).
 
-All binaries are static, dependency-free and built for `x86_64` and `aarch64`. The
-examples below use `x86_64`; swap the architecture in the filename for arm64. Each
-release also carries a `SHA256SUMS` file.
+All binaries are static and dependency-free. The `.deb`, `.rpm` and tarball are
+built for both `x86_64` and `aarch64`; the Arch package is `x86_64` only. The
+examples below use `x86_64` - for arm64, swap in the naming that format uses:
+`arm64` for the `.deb`, `aarch64` for the `.rpm` and the tarball. Each release also
+carries a `SHA256SUMS` file.
 
 ## Debian, Ubuntu, Mint
 
@@ -25,7 +27,8 @@ sudo rpm -i claude-statusline-$VERSION-1.x86_64.rpm
 
 ## Arch Linux
 
-Prebuilt package straight from the release:
+Arch packaging is `x86_64` only - on arm64, use the
+[tarball](#any-other-distro). Prebuilt package straight from the release:
 
 ```bash
 VERSION=1.0.0

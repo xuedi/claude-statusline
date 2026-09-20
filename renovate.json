@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "baseBranchPatterns": ["development"],
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 3,
+  "minimumReleaseAge": "3 days",
+  "lockFileMaintenance": { "enabled": true },
+  "packageRules": [
+    {
+      "matchManagers": ["cargo"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "rust dependencies"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "schedule": ["at any time"],
+    "minimumReleaseAge": null,
+    "labels": ["security"]
+  }
+}
