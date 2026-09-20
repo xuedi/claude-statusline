@@ -1,0 +1,206 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  BIN: claude-statusline
+
+jobs:
+  meta:
+    name: Resolve version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        run: |
+          version=$(sed -n 's/^version *= *"\(.*\)"/\1/p' Cargo.toml | head -1)
+          if [ "$GITHUB_REF_TYPE" = tag ] && [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match Cargo.toml version $version"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --locked
+
+  packages:
+    name: Packages (${{ matrix.arch }})
+    needs: [meta, test]
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+    env:
+      VERSION: ${{ needs.meta.outputs.version }}
+      TARGET: ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Install musl toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends musl-tools
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deb,cargo-binstall
+
+      - name: Install cargo-generate-rpm
+        run: cargo binstall --no-confirm cargo-generate-rpm
+
+      - name: Build static binary
+        env:
+          CC_x86_64_unknown_linux_musl: musl-gcc
+          CC_aarch64_unknown_linux_musl: musl-gcc
+        run: |
+          cargo build --release --locked --target "$TARGET"
+          mkdir -p target/release dist
+          cp "target/$TARGET/release/$BIN" "target/release/$BIN"
+
+      - name: Tarball
+        run: |
+          stage="$BIN-$VERSION-${{ matrix.arch }}-linux"
+          mkdir -p "$stage"
+          cp "target/release/$BIN" README.md LICENSE "$stage/"
+          tar czf "dist/$stage.tar.gz" -C "$stage" .
+          rm -rf "$stage"
+
+      - name: Debian package
+        run: |
+          cargo deb --no-build --no-strip
+          cp target/debian/*.deb dist/
+
+      - name: RPM package
+        run: |
+          cargo generate-rpm
+          cp target/generate-rpm/*.rpm dist/
+
+      - name: Checksums
+        run: |
+          cd dist
+          sha256sum * > "SHA256SUMS-${{ matrix.arch }}"
+          ls -la
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}
+          path: dist/*
+          retention-days: 14
+
+  arch-package:
+    name: Packages (Arch Linux)
+    needs: [meta, packages]
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    env:
+      VERSION: ${{ needs.meta.outputs.version }}
+    steps:
+      - name: Install container prerequisites
+        run: pacman -Syu --noconfirm --needed git
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-x86_64
+          path: downloads
+
+      - name: Build package
+        run: |
+          tarball="$BIN-$VERSION-x86_64-linux.tar.gz"
+          mkdir -p build dist
+          cp "downloads/$tarball" build/
+          sed -e "s|@PKGVER@|$VERSION|" \
+              -e "s|@SOURCE@|$tarball|" \
+              -e "s|@SHA256@|SKIP|" \
+              packaging/PKGBUILD.in > build/PKGBUILD
+          useradd -m builder
+          chown -R builder build
+          su builder -c 'export PACKAGER="${{ github.repository_owner }} via GitHub Actions"; cd build && makepkg --noconfirm --nodeps'
+          cp build/*.pkg.tar.zst dist/
+
+      - name: Verify package contents
+        run: |
+          pacman -Qip dist/*.pkg.tar.zst
+          pacman -Qlp dist/*.pkg.tar.zst
+
+      - name: Checksums
+        run: |
+          cd dist
+          sha256sum *.pkg.tar.zst > SHA256SUMS-arch
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arch-linux
+          path: dist/*
+          retention-days: 14
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [meta, packages, arch-package]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Generate AUR PKGBUILD
+        run: |
+          tarball="$BIN-$VERSION-x86_64-linux.tar.gz"
+          url="${{ github.server_url }}/${{ github.repository }}/releases/download/v$VERSION/$tarball"
+          sha=$(sha256sum "dist/$tarball" | cut -d' ' -f1)
+          sed -e "s|@PKGVER@|$VERSION|" \
+              -e "s|@SOURCE@|$url|" \
+              -e "s|@SHA256@|$sha|" \
+              packaging/PKGBUILD.in > dist/PKGBUILD
+
+      - name: Collect checksums
+        run: |
+          cd dist
+          rm -f SHA256SUMS-*
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

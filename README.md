@@ -3,6 +3,7 @@
 A fast, minimal statusline for [Claude Code](https://claude.com/claude-code).
 
 [![CI](https://github.com/xuedi/claude-statusline/actions/workflows/ci.yml/badge.svg)](https://github.com/xuedi/claude-statusline/actions/workflows/ci.yml)
+[![Release](https://github.com/xuedi/claude-statusline/actions/workflows/release.yml/badge.svg)](https://github.com/xuedi/claude-statusline/actions/workflows/release.yml)
 [![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/)
 [![Made with Braille](https://img.shields.io/badge/progress_bars-%E2%A3%BF%E2%A3%BF%E2%A3%BF%E2%A3%B7-brightgreen)](#what-it-shows)
 [![Rust](https://img.shields.io/badge/Rust-1.85+-orange?logo=rust&logoColor=white)](https://www.rust-lang.org)
@@ -25,6 +26,55 @@ fetches it from Anthropic's `/api/oauth/usage` endpoint and caches the result fo
 
 ## Install
 
+Every tagged release ships static, dependency-free binaries for `x86_64` and
+`aarch64` on the [releases page](https://github.com/xuedi/claude-statusline/releases),
+packaged for the common distro families.
+
+### Debian, Ubuntu, Mint
+
+```bash
+VERSION=0.1.0
+curl -LO https://github.com/xuedi/claude-statusline/releases/download/v$VERSION/claude-statusline_$VERSION-1_amd64.deb
+sudo dpkg -i claude-statusline_$VERSION-1_amd64.deb
+```
+
+### Fedora, RHEL, openSUSE
+
+```bash
+VERSION=0.1.0
+curl -LO https://github.com/xuedi/claude-statusline/releases/download/v$VERSION/claude-statusline-$VERSION-1.x86_64.rpm
+sudo rpm -i claude-statusline-$VERSION-1.x86_64.rpm
+```
+
+### Arch Linux
+
+Install the prebuilt package straight from the release:
+
+```bash
+VERSION=0.1.0
+curl -LO https://github.com/xuedi/claude-statusline/releases/download/v$VERSION/claude-statusline-bin-$VERSION-1-x86_64.pkg.tar.zst
+sudo pacman -U claude-statusline-bin-$VERSION-1-x86_64.pkg.tar.zst
+```
+
+Or build it with the `PKGBUILD` that ships with every release:
+
+```bash
+curl -LO https://github.com/xuedi/claude-statusline/releases/latest/download/PKGBUILD
+makepkg -si
+```
+
+### Any other distro
+
+```bash
+VERSION=0.1.0
+curl -L https://github.com/xuedi/claude-statusline/releases/download/v$VERSION/claude-statusline-$VERSION-x86_64-linux.tar.gz | tar xz
+install -Dm755 claude-statusline ~/.claude/claude-statusline
+```
+
+`aarch64` builds of every package are attached to the same release. The binary is
+statically linked against musl, so it runs on glibc and musl systems alike with no
+runtime dependencies. Each release also carries a `SHA256SUMS` file.
+
 ### From source
 
 ```bash
@@ -38,8 +88,6 @@ Or directly with cargo:
 ```bash
 cargo install --path .
 ```
-
-Prebuilt binaries: coming once the project hits crates.io.
 
 ## Configure Claude Code
 
@@ -79,6 +127,18 @@ just            # list recipes
 just check      # fmt-check + clippy + test - run this before pushing
 just test       # cargo test
 just demo       # pipe a sample payload through the binary
+```
+
+### Releasing
+
+`.github/workflows/release.yml` builds the binaries and every package on each push
+to `main` and keeps them as workflow artifacts for 14 days. Pushing a `v*` tag runs
+the same build and publishes the artifacts as a GitHub release, with a checksum file
+and an AUR-ready `PKGBUILD`. The tag has to match the version in `Cargo.toml` or the
+workflow fails early.
+
+```bash
+git tag v0.2.0 && git push origin v0.2.0
 ```
 
 ### Adding a segment

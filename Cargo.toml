@@ -31,3 +31,28 @@ pretty_assertions = "1"
 lto = "thin"
 codegen-units = 1
 strip = "symbols"
+
+[package.metadata.deb]
+maintainer = "Daniel Koch <xuedi@beijingcode.org>"
+copyright = "2025 Daniel Koch"
+license-file = ["LICENSE", "0"]
+section = "utils"
+priority = "optional"
+depends = ""
+extended-description = """\
+Reads the Claude Code statusline JSON payload on stdin and prints a single line \
+with project name, model, git branch and diff, token usage, effort level and \
+5h/7d rate limits."""
+assets = [
+    ["target/release/claude-statusline", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/claude-statusline/README.md", "644"],
+]
+
+[package.metadata.generate-rpm]
+license = "EUPL-1.2"
+auto-req = "disabled"
+assets = [
+    { source = "target/release/claude-statusline", dest = "/usr/bin/claude-statusline", mode = "755" },
+    { source = "README.md", dest = "/usr/share/doc/claude-statusline/README.md", mode = "644", doc = true },
+    { source = "LICENSE", dest = "/usr/share/licenses/claude-statusline/LICENSE", mode = "644" },
+]
