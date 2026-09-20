@@ -154,6 +154,25 @@ There is no `Segment` trait - five hand-listed segments do not need the indirect
 PRs welcome. Run `just check` before pushing. Keep the binary single-purpose; no new
 mandatory dependencies without discussion.
 
+### Branching
+
+`main` is protected: it takes no direct pushes, no force-pushes and no deletions,
+requires the CI `check` job to be green, and keeps a linear history.
+
+- Day-to-day work goes on `development`, or on a short-lived topic branch cut from
+  it (`feat/...`, `fix/...`) that merges back into `development`.
+- Ship by opening a pull request from `development` into `main`.
+- Merge with squash or rebase - merge commits are disabled.
+- Tag releases on `main` once the PR has landed.
+
+```bash
+git switch development
+git pull --rebase
+# ... work, just check ...
+git push
+gh pr create --base main --head development
+```
+
 ## License
 
 [EUPL-1.2](LICENSE)

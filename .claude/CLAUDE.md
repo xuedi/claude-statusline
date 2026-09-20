@@ -84,6 +84,17 @@ introducing a mocking layer.
 Never create commits yourself. `git status` and `git diff` are fine for inspection.
 Let the user commit.
 
+`main` is protected on GitHub and only moves through pull requests:
+
+- All work happens on `development` (or a short-lived topic branch cut from it).
+- Never edit or push `main` directly - it rejects direct pushes, force-pushes and
+  deletions, and requires the CI `check` job to pass.
+- `development` merges into `main` by pull request. Squash or rebase only; merge
+  commits are disabled because `main` requires linear history.
+- After a release merge, bring `development` back up to date with
+  `git switch development && git rebase origin/main`.
+- If a task starts while `main` is checked out, switch to `development` first.
+
 ## Planning
 
 If asked for a plan, write it to `.claude/plans/YYYY-MM-DD_<slug>.md` (create the
