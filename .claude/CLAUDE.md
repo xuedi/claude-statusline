@@ -3,9 +3,9 @@
 ## What this is
 
 A tiny Rust CLI that reads the Claude Code statusline JSON payload from stdin and
-prints one line: model, git branch and diff, token usage with a braille bar, effort
-level, and 5h/7d rate limits. Around 500 lines of code total, library plus a thin
-binary.
+prints one line: project name, model, git branch and diff, token usage with a braille
+bar, effort level, and 5h/7d rate limits. Around 500 lines of code total, library
+plus a thin binary.
 
 ## Run it
 
@@ -41,6 +41,7 @@ Run that before reporting work done.
 | src/time.rs                   | Epoch + ISO datetime helpers                              |
 | src/segments/mod.rs           | `all(&Input)` flat dispatcher                             |
 | src/segments/model.rs         | Model name segment                                        |
+| src/segments/project.rs       | Project name segment + generic-subfolder list             |
 | src/segments/git.rs           | Git branch + numstat segment                              |
 | src/segments/tokens.rs        | Token bar segment                                         |
 | src/segments/effort.rs        | Effort level segment                                      |
@@ -63,6 +64,7 @@ Covered:
 - `bar::render` - bar widths at 0%, 50%, 100%, partial steps, clamping
 - `segments::tokens::format_tokens` - all the rounding and unit boundaries
 - `segments::model::format_model` - context-paren stripping, edge cases
+- `segments::project::project_name` - generic-subfolder walk-up, list invariants
 - `time::iso_to_epoch`, `time::epoch_from_value` - happy path + rejection
 - `cache::short_hash` - determinism, differentiation, hex shape
 - `lib::render` - empty input, malformed JSON, full payload (integration test)

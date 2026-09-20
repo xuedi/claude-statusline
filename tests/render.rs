@@ -19,6 +19,7 @@ fn full_builtin_payload_emits_expected_segments() {
     let payload = r#"{
         "model": {"display_name": "Claude Sonnet 4.6 (1M context)"},
         "cwd": "/nonexistent-not-a-git-repo-12345",
+        "workspace": {"project_dir": "/home/someone/Projects/FileFin/app"},
         "context_window": {
             "context_window_size": 1000000,
             "current_usage": {"input_tokens": 250000}
@@ -32,14 +33,16 @@ fn full_builtin_payload_emits_expected_segments() {
     let out = render(payload);
     let parts: Vec<&str> = out.split(" | ").collect();
 
-    assert_eq!(parts[0], "Claude Sonnet 4.6 1M");
+    // project name leads, with the meaningless "app" subfolder skipped
+    assert_eq!(parts[0], "FileFin");
+    assert_eq!(parts[1], "Claude Sonnet 4.6 1M");
     // effort comes right after model
     assert_eq!(
-        parts[1],
-        format!("Effort: {}", parts[1].trim_start_matches("Effort: "))
+        parts[2],
+        format!("Effort: {}", parts[2].trim_start_matches("Effort: "))
     );
     // git segment is absent (cwd is not a repo) so tokens comes next
-    assert!(parts[2].starts_with("250k/1m ["));
-    assert_eq!(parts[3], "HourlyReset: 42%");
-    assert_eq!(parts[4], "WeeklyReset: 18%");
+    assert!(parts[3].starts_with("250k/1m ["));
+    assert_eq!(parts[4], "HourlyReset: 42%");
+    assert_eq!(parts[5], "WeeklyReset: 18%");
 }

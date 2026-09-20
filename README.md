@@ -8,11 +8,12 @@ A fast, minimal statusline for [Claude Code](https://claude.com/claude-code).
 [![Rust](https://img.shields.io/badge/Rust-1.85+-orange?logo=rust&logoColor=white)](https://www.rust-lang.org)
 
 ```
-Claude Sonnet 4.6 1M | Effort: high | git@main (+12 -3) | 250k/1m [⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀] | HourlyReset: 3% @03:30 | WeeklyReset: 11% @May 18, 22:00
+MeetAgain | Claude Sonnet 4.6 1M | Effort: high | git@main (+12 -3) | 250k/1m [⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀] | HourlyReset: 3% @03:30 | WeeklyReset: 11% @May 18, 22:00
 ```
 
 ## What it shows
 
+- **Project** - the project folder name, skipping role subfolders (`FileFin/app` shows `FileFin`)
 - **Model** - active Claude model, with the context window summarized (`Sonnet 4.6 1M`)
 - **Git** - branch and unstaged diff size in the current working directory
 - **Tokens** - used/total of the context window plus a 20-cell braille progress bar

@@ -6,9 +6,17 @@ use serde_json::Value;
 pub struct Input {
     pub model: Option<Model>,
     pub cwd: Option<String>,
+    pub workspace: Option<Workspace>,
     pub context_window: Option<ContextWindow>,
     pub rate_limits: Option<RateLimits>,
     pub effort: Option<Effort>,
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
+pub struct Workspace {
+    pub current_dir: Option<String>,
+    pub project_dir: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
